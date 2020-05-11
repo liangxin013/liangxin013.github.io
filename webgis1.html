@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="initial-scale=1,maximum-scale=1,user-scalable=no"
+    />
+    <title>Intro to MapView - Create a 2D map - 4.15</title>
+    <style>
+      html,
+      body{
+        height: 100%;
+        width: 100%;
+      }
+      #div1{
+        background-color:Pink;
+        height: 3%;
+        width: 100%;
+      }
+      #viewDiv {
+        padding: 0;
+        margin: 0;
+        height: 96%;
+        width: 100%;
+      }
+    
+    </style>
+
+    <link
+      rel="stylesheet"
+      href="https://js.arcgis.com/4.15/esri/themes/light/main.css"
+    />
+    <script src="https://js.arcgis.com/4.15/"></script>
+
+    <script>
+      require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer",
+      "esri/widgets/Legend","esri/widgets/ScaleBar"], 
+      
+      function(Map, MapView,FeatureLayer,Legend,ScaleBar) {
+        var featurelayer1 = new FeatureLayer({url:"https://www.arcgisonline.cn/server/rest/services/Hosted/%E6%97%85%E6%B8%B8%E8%AE%B0%E5%BD%951/FeatureServer"});
+        var map1 = new Map({
+          basemap: "streets"
+        });
+
+        map1.layers.add(featurelayer1);
+        var view1 = new MapView({
+          container: "viewDiv",
+          map: map1,
+          zoom: 13,
+          center: [114.2, 22.287] // longitude, latitude
+        });
+        var legend1 = new Legend({
+  view: view1,
+  layerInfos: [{
+    layer: featurelayer1,
+    title: "旅行点"
+  }]
+});
+
+view1.ui.add(legend1, "bottom-right");
+
+var scaleBar1 = new ScaleBar({
+  view: view1,
+  style:"ruler",
+  unit:"metric"
+});
+// Add widget to the bottom left corner of the view
+view1.ui.add(scaleBar1, {
+  position: "bottom-left"
+});
+
+ var coordsWidget = document.createElement("div");
+      coordsWidget.id = "coordsWidget";
+      coordsWidget.className = "esri-widget esri-component";
+      coordsWidget.style.padding = "7px 15px 5px";
+
+      view1.ui.add(coordsWidget, "bottom-right");
+      
+      function showCoordinates(pt) {
+        var coords = "Lat/Lon " + pt.latitude.toFixed(3) + " " + pt.longitude.toFixed(3) +
+            " | Scale 1:" + Math.round(view1.scale * 1) / 1 +
+            " | Zoom " + view1.zoom;
+        coordsWidget.innerHTML = coords;
+      }
+      
+      view1.watch("stationary", function(isStationary) {
+        showCoordinates(view1.center);
+      });
+
+      view1.on("pointer-move", function(evt) {
+        showCoordinates(view1.toMap({ x: evt.x, y: evt.y }));
+      });
+      });
+    </script>
+  </head>
+
+  <body>
+    <div id="div1">旅行记录</div>
+    <div id="viewDiv"></div>
+  </body>
+</html>
